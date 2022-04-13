@@ -48,7 +48,8 @@ jobs:
         run: |
           python kindle.py '${{ secrets.KINDLE_COOKIE}}' --is-cn # delete --is-cn if you are using com
       - name: Push new README
+        run: |
           git config --local user.email "${{ env.GITHUB_EMAIL }}"
           git config --local user.name "${{ env.GITHUB_EMAIL }}"
-          git commit -a -m 'update readme' || echo "nothing to commit"
+          git commit -a -m 'Replace README' || echo "nothing to commit"
           git push || echo "nothing to push"
