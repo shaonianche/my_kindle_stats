@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from http.cookies import SimpleCookie
 from datetime import datetime
 import re
@@ -12,22 +15,21 @@ KINDLE_HISTORY_URL = KINDLE_BASE_URL + "data"
 KINDLE_CN_HISTORY_URL = KINDLE_CN_BASE_URL + "data"
 
 KINDLE_SINGLE_BOOK_URL = KINDLE_BASE_URL + "titlesCompleted/{book_id}?isPDoc=true"
-KINDLE_CN_SINGLE_BOOK_URL = (
-    KINDLE_CN_BASE_URL + "titlesCompleted/{book_id}?isPDoc={is_doc}"
-)
+KINDLE_CN_SINGLE_BOOK_URL = (KINDLE_CN_BASE_URL +
+                             "titlesCompleted/{book_id}?isPDoc={is_doc}")
 
 AMAZON_BOOK_URL = "https://www.amazon.com/dp/{book_id}"
 AMAZON_CN_BOOK_URL = "https://www.amazon.cn/dp/{book_id}"
 
 KINDLE_HEADER = {
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) "
+    "User-Agent":
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) "
     "AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/1AE148",
 }
 
 GITHUB_README_COMMENTS = (
-    "(<!--START_SECTION:{name}-->\n)(.*)(<!--END_SECTION:{name}-->\n)"
-)
-KINDLE_HEAD_INFO = "## I have read {books_count} books this year\n\n"
+    "(<!--START_SECTION:{name}-->\n)(.*)(<!--END_SECTION:{name}-->\n)")
+KINDLE_HEAD_INFO = "#### I have read {books_count} books this year\n\n"
 KINDLE_TABLE_HEAD = "| ID | Title | Authors | Date | \n | ---- | ---- | ---- | ---- |\n"
 KINDLE_STAT_TEMPLATE = "| {id} | {title} | {authors} | {date} |\n"
 
@@ -54,9 +56,8 @@ class Kindle:
         self.header = KINDLE_HEADER
         self.is_cn = is_cn
         self.KINDLE_URL = KINDLE_CN_HISTORY_URL if self.is_cn else KINDLE_HISTORY_URL
-        self.KINDLE_BOOK_URL = (
-            KINDLE_CN_SINGLE_BOOK_URL if self.is_cn else KINDLE_SINGLE_BOOK_URL
-        )
+        self.KINDLE_BOOK_URL = (KINDLE_CN_SINGLE_BOOK_URL
+                                if self.is_cn else KINDLE_SINGLE_BOOK_URL)
         self.AMAZON_URL = AMAZON_CN_BOOK_URL if self.is_cn else AMAZON_BOOK_URL
         self.has_session = False
 
@@ -67,9 +68,9 @@ class Kindle:
         cookiejar = None
         for key, morsel in cookie.items():
             cookies_dict[key] = morsel.value
-            cookiejar = requests.utils.cookiejar_from_dict(
-                cookies_dict, cookiejar=None, overwrite=True
-            )
+            cookiejar = requests.utils.cookiejar_from_dict(cookies_dict,
+                                                           cookiejar=None,
+                                                           overwrite=True)
         return cookiejar
 
     def make_session(self):
@@ -94,11 +95,7 @@ class Kindle:
         if not book_info:
             print(f"There's no book info if id {book_id}")
         book_title = book_info["title"]
-        slice_index = book_title.find("(")
-        if slice_index == -1:
-            slice_index = book_title.find("（")
-        if slice_index != -1:
-            book_title = book_title[:slice_index]
+        book_title = re.sub(r'(\（[^)]*\）)|(\([^)]*\))|(\【[^)]*\】)|(\[[^)]*\])|(\s)', '', book_title)
         book_title = book_title.replace(" ", "")
         if is_doc == "false":
             book_url = self.AMAZON_URL.format(book_id=book_id)
@@ -123,9 +120,10 @@ class Kindle:
                 break
             is_doc = title.get("content_type", "") == "PDOC"
             book_title, authors = self.get_single_read_book_info(
-                title.get("asin"), is_doc
-            )
+                title.get("asin"), is_doc)
             title["book_title"] = book_title
+            if len(title["book_title"]) == 0:
+                continue
             title["authors"] = authors
             result.append(title)
         return result
