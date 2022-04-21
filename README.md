@@ -34,7 +34,7 @@ Or:
 You can add `KINDLE_COOKIE` secret using with `GitHub Actions`
 
 <!--START_SECTION:my_kindle-->
-#### I have read 8 books this year
+## I have read 8 books this year
 
 | ID | Title | Authors | Date | 
  | ---- | ---- | ---- | ---- |
